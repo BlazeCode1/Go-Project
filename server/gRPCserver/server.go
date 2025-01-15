@@ -2,13 +2,11 @@ package main
 
 import (
 	"context"
+	"faisal.com/bookProject/couchbase"
+	pb "faisal.com/bookProject/server/proto"
 	"fmt"
 	"log"
 	"net"
-	"time"
-
-	"faisal.com/bookProject/couchbase"
-	pb "faisal.com/bookProject/server/proto"
 
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
@@ -62,7 +60,7 @@ func (s *server) AddBook(ctx context.Context, req *pb.BookRequest) (*pb.BookResp
 
 	// Return success message
 	return &pb.BookResponse{
-		Message: fmt.Sprintf("Book '%s' has been added successfully at %v", req.BookName, time.Now()),
+		Message: fmt.Sprintf("Book '%s' has been added successfully", req.BookName),
 	}, nil
 }
 
