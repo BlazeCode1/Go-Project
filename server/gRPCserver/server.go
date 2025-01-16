@@ -66,17 +66,17 @@ func (s *server) AddBook(ctx context.Context, req *pb.BookRequest) (*pb.BookResp
 }
 
 // DeleteBook implements the gRPC method to handle book deletion
-func (s *server) DeleteBook(ctx context.Context, req *pb.BookRequest) (*pb.BookResponse, error) {
-	log.Printf("Received bookName to delete: %s", req.BookName)
+func (s *server) DeleteBook(ctx context.Context, req *pb.BookDeletionRequest) (*pb.BookResponse, error) {
+	log.Printf("Received bookName to delete: %s", req.Id)
 
 	// Prepare a query to delete the book from Couchbase
-	query := "DELETE FROM `books_bucket` WHERE book_name = $book_name"
+	query := "DELETE FROM `books_bucket` WHERE id = $id"
 
 	// Define query options with parameters
 	options := &gocb.QueryOptions{
 		NamedParameters: map[string]interface{}{
-			// Replace $book_name with the value of req.BookName
-			"book_name": req.BookName,
+			// Replace $id with the value of req.Id
+			"id": req.Id,
 		},
 	}
 
@@ -88,7 +88,7 @@ func (s *server) DeleteBook(ctx context.Context, req *pb.BookRequest) (*pb.BookR
 
 	// Return success message
 	return &pb.BookResponse{
-		Message: fmt.Sprintf("Book '%s' has been deleted successfully", req.BookName),
+		Message: fmt.Sprintf("Book with id '%s' has been deleted successfully", req.Id),
 	}, nil
 }
 

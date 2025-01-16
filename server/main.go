@@ -68,13 +68,13 @@ func main() {
 
 	app.Delete("/book", func(c *fiber.Ctx) error {
 		var data struct {
-			BookName string `json:"book_name"`
+			Id string `json:"id"`
 		}
 		if err := c.BodyParser(&data); err != nil {
 			return fiber.NewError(fiber.StatusBadRequest, "Invalid request")
 		}
-		resp, err := client.DeleteBook(context.Background(), &pb.BookRequest{
-			BookName: data.BookName,
+		resp, err := client.DeleteBook(context.Background(), &pb.BookDeletionRequest{
+			Id: data.Id,
 		})
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, "Failed to delete book")

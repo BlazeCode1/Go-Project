@@ -31,7 +31,7 @@ type BookServiceClient interface {
 	// grpc method to handle a book name
 	AddBook(ctx context.Context, in *BookRequest, opts ...grpc.CallOption) (*BookResponse, error)
 	GetBooks(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*BookListResponse, error)
-	DeleteBook(ctx context.Context, in *BookRequest, opts ...grpc.CallOption) (*BookResponse, error)
+	DeleteBook(ctx context.Context, in *BookDeletionRequest, opts ...grpc.CallOption) (*BookResponse, error)
 }
 
 type bookServiceClient struct {
@@ -62,7 +62,7 @@ func (c *bookServiceClient) GetBooks(ctx context.Context, in *EmptyRequest, opts
 	return out, nil
 }
 
-func (c *bookServiceClient) DeleteBook(ctx context.Context, in *BookRequest, opts ...grpc.CallOption) (*BookResponse, error) {
+func (c *bookServiceClient) DeleteBook(ctx context.Context, in *BookDeletionRequest, opts ...grpc.CallOption) (*BookResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(BookResponse)
 	err := c.cc.Invoke(ctx, BookService_DeleteBook_FullMethodName, in, out, cOpts...)
@@ -79,7 +79,7 @@ type BookServiceServer interface {
 	// grpc method to handle a book name
 	AddBook(context.Context, *BookRequest) (*BookResponse, error)
 	GetBooks(context.Context, *EmptyRequest) (*BookListResponse, error)
-	DeleteBook(context.Context, *BookRequest) (*BookResponse, error)
+	DeleteBook(context.Context, *BookDeletionRequest) (*BookResponse, error)
 	mustEmbedUnimplementedBookServiceServer()
 }
 
@@ -96,7 +96,7 @@ func (UnimplementedBookServiceServer) AddBook(context.Context, *BookRequest) (*B
 func (UnimplementedBookServiceServer) GetBooks(context.Context, *EmptyRequest) (*BookListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBooks not implemented")
 }
-func (UnimplementedBookServiceServer) DeleteBook(context.Context, *BookRequest) (*BookResponse, error) {
+func (UnimplementedBookServiceServer) DeleteBook(context.Context, *BookDeletionRequest) (*BookResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteBook not implemented")
 }
 func (UnimplementedBookServiceServer) mustEmbedUnimplementedBookServiceServer() {}
@@ -157,7 +157,7 @@ func _BookService_GetBooks_Handler(srv interface{}, ctx context.Context, dec fun
 }
 
 func _BookService_DeleteBook_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(BookRequest)
+	in := new(BookDeletionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -169,7 +169,7 @@ func _BookService_DeleteBook_Handler(srv interface{}, ctx context.Context, dec f
 		FullMethod: BookService_DeleteBook_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BookServiceServer).DeleteBook(ctx, req.(*BookRequest))
+		return srv.(BookServiceServer).DeleteBook(ctx, req.(*BookDeletionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

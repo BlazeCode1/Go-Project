@@ -1,6 +1,8 @@
 const form = document.getElementById('book-form');
 const responseMessage = document.getElementById('response-message');
 const booksList = document.getElementById('books-list');
+const input = document.getElementById('book-name');
+const deleteResponse = document.getElementById('delete-response-message')
 // Function to fetch and display the list of books
 const fetchBooks = async () => {
     try {
@@ -13,35 +15,45 @@ const fetchBooks = async () => {
         // Clear the current list
         booksList.innerHTML = '';
 
-        // Populate the list with fetched books
+        // Fill the list with fetched books
         books.forEach(book => {
             booksList.innerHTML += `
-<div class="flex justify-between px-8 py-4">
-    <li id="${book.id}">${book.book_name}</li> 
+        <div class="flex justify-between px-8 py-4">
+        <li id="${book.id}">${book.book_name}</li> 
     
-    <button data-id="${book.id}" onclick='deleteBook("${book.book_name}")' >❌</button>
-    </div>
+        <button data-id="${book.id}" onclick='deleteBook("${book.id}")' >❌</button>
+        </div>
 `;
-        });
+            input.value = '';
+        }
+        )
+
+        ;
     } catch (err) {
         console.error('Failed to fetch books:', err);
     }
 };
 
-async function deleteBook(bookName){
+async function deleteBook(bookId){
     try {
         const res = await fetch(`/book`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ book_name: bookName }),
+            body: JSON.stringify({ id: bookId }),
         });
         const data = await res.json();
-        responseMessage.textContent = data.message;}
+        deleteResponse.textContent = "Book has been deleted successfully";
+
+
+    }
     catch (err) {
         console.error('Failed to delete book:', err);
     }
+
+
+
     await fetchBooks();
 }
 
