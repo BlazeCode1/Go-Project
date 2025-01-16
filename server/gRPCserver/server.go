@@ -17,9 +17,8 @@ type server struct {
 }
 
 func (s *server) GetBooks(ctx context.Context, req *pb.EmptyRequest) (*pb.BookListResponse, error) {
-	//collection := couchbase.GetCollection()
 
-	// Query all documents in Couchbase (basic example)
+	// Query all books details in Couchbase
 	query := "SELECT id, book_name FROM `books_bucket`"
 	rows, err := couchbase.Cluster.Query(query, nil)
 	if err != nil {
@@ -27,6 +26,7 @@ func (s *server) GetBooks(ctx context.Context, req *pb.EmptyRequest) (*pb.BookLi
 	}
 
 	var books []*pb.Book
+	//  rows.Next() iterates through the result rows retrieved from a database query
 	for rows.Next() {
 		var row couchbase.Book
 		if err := rows.Row(&row); err != nil {

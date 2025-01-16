@@ -49,6 +49,7 @@ func main() {
 			return fiber.NewError(fiber.StatusInternalServerError, "Failed to proccess book name")
 		}
 
+		//send a JSON-formatted response back to the client.
 		return c.JSON(fiber.Map{
 			"message": resp.Message,
 		})
