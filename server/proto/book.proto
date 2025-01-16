@@ -7,6 +7,7 @@ service BookService {
 //  grpc method to handle a book name
   rpc AddBook(BookRequest) returns (BookResponse);
   rpc GetBooks (EmptyRequest) returns (BookListResponse);
+  rpc DeleteBook(BookRequest) returns (BookResponse);
 
 }
 

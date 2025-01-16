@@ -5,6 +5,7 @@ import (
 	"faisal.com/bookProject/couchbase"
 	pb "faisal.com/bookProject/server/proto"
 	"fmt"
+	"github.com/couchbase/gocb/v2"
 	"log"
 	"net"
 
@@ -17,9 +18,8 @@ type server struct {
 }
 
 func (s *server) GetBooks(ctx context.Context, req *pb.EmptyRequest) (*pb.BookListResponse, error) {
-	//collection := couchbase.GetCollection()
 
-	// Query all documents in Couchbase (basic example)
+	// Query all books details in Couchbase
 	query := "SELECT id, book_name FROM `books_bucket`"
 	rows, err := couchbase.Cluster.Query(query, nil)
 	if err != nil {
@@ -27,6 +27,7 @@ func (s *server) GetBooks(ctx context.Context, req *pb.EmptyRequest) (*pb.BookLi
 	}
 
 	var books []*pb.Book
+	//  rows.Next() iterates through the result rows retrieved from a database query
 	for rows.Next() {
 		var row couchbase.Book
 		if err := rows.Row(&row); err != nil {
@@ -61,6 +62,33 @@ func (s *server) AddBook(ctx context.Context, req *pb.BookRequest) (*pb.BookResp
 	// Return success message
 	return &pb.BookResponse{
 		Message: fmt.Sprintf("Book '%s' has been added successfully", req.BookName),
+	}, nil
+}
+
+// DeleteBook implements the gRPC method to handle book deletion
+func (s *server) DeleteBook(ctx context.Context, req *pb.BookRequest) (*pb.BookResponse, error) {
+	log.Printf("Received bookName to delete: %s", req.BookName)
+
+	// Prepare a query to delete the book from Couchbase
+	query := "DELETE FROM `books_bucket` WHERE book_name = $book_name"
+
+	// Define query options with parameters
+	options := &gocb.QueryOptions{
+		NamedParameters: map[string]interface{}{
+			// Replace $book_name with the value of req.BookName
+			"book_name": req.BookName,
+		},
+	}
+
+	// Execute the query
+	_, err := couchbase.Cluster.Query(query, options)
+	if err != nil {
+		return nil, fmt.Errorf("failed to delete book from Couchbase: %v", err)
+	}
+
+	// Return success message
+	return &pb.BookResponse{
+		Message: fmt.Sprintf("Book '%s' has been deleted successfully", req.BookName),
 	}, nil
 }
 

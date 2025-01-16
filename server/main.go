@@ -49,6 +49,7 @@ func main() {
 			return fiber.NewError(fiber.StatusInternalServerError, "Failed to proccess book name")
 		}
 
+		//send a JSON-formatted response back to the client.
 		return c.JSON(fiber.Map{
 			"message": resp.Message,
 		})
@@ -63,6 +64,23 @@ func main() {
 		}
 
 		return c.JSON(resp.Books)
+	})
+
+	app.Delete("/book", func(c *fiber.Ctx) error {
+		var data struct {
+			BookName string `json:"book_name"`
+		}
+		if err := c.BodyParser(&data); err != nil {
+			return fiber.NewError(fiber.StatusBadRequest, "Invalid request")
+		}
+		resp, err := client.DeleteBook(context.Background(), &pb.BookRequest{
+			BookName: data.BookName,
+		})
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, "Failed to delete book")
+		}
+
+		return c.JSON(resp.Message)
 	})
 
 	log.Println("Fiber server is running on http://localhost:3000")
