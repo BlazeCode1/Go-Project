@@ -7,7 +7,11 @@ import (
 	"fmt"
 	"github.com/couchbase/gocb/v2"
 	"github.com/google/uuid"
-	"github.com/segmentio/kafka-go"
+	"os"
+	"os/signal"
+
+	//"github.com/segmentio/kafka-go"
+	"github.com/Trendyol/kafka-konsumer/v2"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -117,35 +121,72 @@ func main() {
 
 func consumeKafka() {
 	// Initialise a new reader
-	kafkaReader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:  []string{"localhost:9092"},
-		Topic:    "book-events",
-		GroupID:  "book-group",
-		MinBytes: 1,
-		MaxBytes: 10e6,
-	})
+	//kafkaReader := kafka.NewReader(kafka.ReaderConfig{
+	//	Brokers:  []string{"localhost:9092"},
+	//	Topic:    "book-events",
+	//	GroupID:  "book-group",
+	//	MinBytes: 1,
+	//	MaxBytes: 10e6,
+	//})
 
-	defer kafkaReader.Close()
-
-	for {
-		// Read message from kafka
-		msg, err := kafkaReader.ReadMessage(context.Background())
-		if err != nil {
-			log.Fatalf("failed to read message: %v", err)
-			continue
-		}
-
-		log.Printf("Received message: %s\n", msg.Value)
-
-		// Extract book id and updated name
-		bookID := string(msg.Key)
-		updatedBookName := string(msg.Value)
-
-		//	Update book in db
-		if err := couchbase.UpdateBook(bookID, updatedBookName); err != nil {
-			log.Fatalf("failed to update book: %v", err)
-		} else {
-			log.Printf("Book with id '%s' has been updated successfully", bookID)
-		}
+	consumerCfg := &kafka.ConsumerConfig{
+		Reader: kafka.ReaderConfig{
+			Brokers:  []string{"localhost:9092"},
+			Topic:    "book-events",
+			GroupID:  "book-group",
+			MinBytes: 1,
+			MaxBytes: 10e6,
+		},
+		RetryEnabled: false,
+		ConsumeFn:    consumeFn,
 	}
+
+	// initialize the kafka consumer
+	consumer, _ := kafka.NewConsumer(consumerCfg)
+	defer consumer.Stop()
+	//defer kafkaReader.Close()
+
+	consumer.Consume()
+	log.Println("Consumer started...!")
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	<-c
+
+	//for {
+	//	// Read message from kafka
+	//	msg, err := kafkaReader.ReadMessage(context.Background())
+	//	if err != nil {
+	//		log.Fatalf("failed to read message: %v", err)
+	//		continue
+	//	}
+	//
+	//	log.Printf("Received message: %s\n", msg.Value)
+	//
+	//	// Extract book id and updated name
+	//	bookID := string(msg.Key)
+	//	updatedBookName := string(msg.Value)
+	//
+	//	//	Update book in db
+	//	if err := couchbase.UpdateBook(bookID, updatedBookName); err != nil {
+	//		log.Fatalf("failed to update book: %v", err)
+	//	} else {
+	//		log.Printf("Book with id '%s' has been updated successfully", bookID)
+	//	}
+	//}
+}
+
+func consumeFn(message *kafka.Message) error {
+	log.Printf("Received message: %s\n", message.Value)
+
+	bookID := string(message.Key)
+
+	updatedBookName := string(message.Value)
+
+	if err := couchbase.UpdateBook(bookID, updatedBookName); err != nil {
+		log.Fatalf("failed to update book: %v", err)
+		return err
+	}
+
+	log.Printf("Book with id '%s' has been updated successfully", bookID)
+	return nil
 }
