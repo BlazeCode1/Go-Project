@@ -6,11 +6,11 @@ import (
 	pb "faisal.com/bookProject/server/proto"
 	"fmt"
 	"github.com/couchbase/gocb/v2"
+	"github.com/google/uuid"
+	"github.com/segmentio/kafka-go"
+	"google.golang.org/grpc"
 	"log"
 	"net"
-
-	"github.com/google/uuid"
-	"google.golang.org/grpc"
 )
 
 type server struct {
@@ -97,6 +97,9 @@ func main() {
 	// Initialize Couchbase
 	couchbase.InitCouchbase("admin", "1q2w3e4r5t", "books_bucket")
 
+	// Start kafka consumer
+	go consumeKafka()
+
 	// Start gRPC server
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
@@ -109,5 +112,40 @@ func main() {
 	log.Println("Server started on :50051")
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
+	}
+}
+
+func consumeKafka() {
+	// Initialise a new reader
+	kafkaReader := kafka.NewReader(kafka.ReaderConfig{
+		Brokers:  []string{"localhost:9092"},
+		Topic:    "book-events",
+		GroupID:  "book-group",
+		MinBytes: 1,
+		MaxBytes: 10e6,
+	})
+
+	defer kafkaReader.Close()
+
+	for {
+		// Read message from kafka
+		msg, err := kafkaReader.ReadMessage(context.Background())
+		if err != nil {
+			log.Fatalf("failed to read message: %v", err)
+			continue
+		}
+
+		log.Printf("Received message: %s\n", msg.Value)
+
+		// Extract book id and updated name
+		bookID := string(msg.Key)
+		updatedBookName := string(msg.Value)
+
+		//	Update book in db
+		if err := couchbase.UpdateBook(bookID, updatedBookName); err != nil {
+			log.Fatalf("failed to update book: %v", err)
+		} else {
+			log.Printf("Book with id '%s' has been updated successfully", bookID)
+		}
 	}
 }

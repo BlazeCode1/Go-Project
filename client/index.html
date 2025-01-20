@@ -4,21 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Input</title>
-    <!-- Tailwind link    -->
+    <!-- Tailwind link -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="flex justify-center items-center min-h-screen bg-gray-900 text-white">
     <div class="flex flex-col md:flex-row w-full max-w-4xl gap-8 px-4">
-        <!-- Input Form  -->
+        <!-- Input Form -->
         <div class="w-full md:w-1/2">
             <h1 class="text-3xl font-bold text-center mb-6">Book Input Form 📚 </h1>
             <form id="book-form" class="bg-gray-800 p-6 rounded-lg shadow-lg">
                 <div class="mb-4">
-                    <label
-                            for="book-name"
-                            class="block text-sm font-medium text-gray-300">
+                    <label for="book-name" class="block text-sm font-medium text-gray-300">
                         Book Name
                     </label>
                     <input
@@ -33,8 +31,7 @@
                 <!-- Button -->
                 <button
                         type="submit"
-                        class="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium text-lg transition-all"
-                >
+                        class="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium text-lg transition-all">
                     Add book
                 </button>
             </form>
@@ -45,16 +42,37 @@
         <div class="w-full md:w-1/2">
             <h2 class="text-2xl font-semibold text-center mb-4 text-orange-500">Books List</h2>
 
-            <ul id="books-list" class="bg-gray-800 p-4 rounded-lg shadow-lg divide-y divide-gray-700">
-                <!-- Fetched books will be here -->
-                <button type="submit">lslsl</button>
-            </ul>
-
+            <ul id="books-list" class="bg-gray-800 p-4 rounded-lg shadow-lg divide-y divide-gray-700"></ul>
             <p id="delete-response-message" class="mt-4 text-center text-sm text-gray-400"></p>
-
         </div>
     </div>
 </div>
+
+<!-- Modal for editing -->
+<div id="edit-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+    <div class="bg-gray-800 text-white p-6 rounded-lg text-center w-96">
+        <h3 class="text-2xl font-semibold mb-4">Edit Book Name</h3>
+        <input
+                type="text"
+                id="edit-book-name"
+                placeholder="Enter new book name"
+                class="w-full mt-2 p-2 rounded-md bg-gray-600 text-white placeholder-gray-400 border border-gray-500 focus:ring-2 focus:ring-orange-500 focus:outline-none"
+        />
+        <div class="flex justify-center mt-4 space-x-4">
+            <button
+                    id="save-edit-btn"
+                    class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg">
+                Save
+            </button>
+            <button
+                    id="cancel-edit-btn"
+                    class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
 <script src="script.js"></script>
 </body>
 </html>
