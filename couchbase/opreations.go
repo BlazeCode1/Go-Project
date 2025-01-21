@@ -22,3 +22,16 @@ func InsertBook(book Book) error {
 	}
 	return nil
 }
+
+func UpdateBook(id, newBookName string) error {
+	_, err := Cluster.Bucket("books_bucket").DefaultCollection().Upsert(id, map[string]interface{}{
+		"id":        id,
+		"book_name": newBookName,
+	}, nil)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
