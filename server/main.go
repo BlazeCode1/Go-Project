@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"github.com/Trendyol/kafka-konsumer/v2"
+	"google.golang.org/grpc/credentials/insecure"
+
 	//"github.com/segmentio/kafka-go"
 	"log"
 
@@ -21,7 +23,7 @@ func main() {
 
 	// grpc connection
 	// act as a grpc client :
-	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+	conn, err := grpc.NewClient("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
